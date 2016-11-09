@@ -1,5 +1,9 @@
 Gem Sessions
 ============
+[![GoDoc](https://godoc.org/github.com/go-gem/sessions?status.svg)](https://godoc.org/github.com/go-gem/sessions)
+[![Build Status](https://travis-ci.org/go-gem/sessions.svg?branch=master)](https://travis-ci.org/go-gem/sessions)
+[![Coverage Status](https://coveralls.io/repos/github/go-gem/sessions/badge.svg?branch=master)](https://coveralls.io/github/go-gem/sessions?branch=master)
+
 Gem Sessions is a sessions package for [fasthttp](https://github.com/valyala/fasthttp), it provides cookie and filesystem sessions
 and infrastructure for custom session backends.
 
