@@ -125,8 +125,7 @@ var (
 
 // GetRegistry returns a registry instance for the current request.
 func GetRegistry(ctx *fasthttp.RequestCtx) (registry *Registry) {
-	registry = Get(ctx)
-	if registry != nil {
+	if registry = Get(ctx); registry != nil {
 		return registry
 	}
 	registry = registryPool.Get().(*Registry)
@@ -161,14 +160,14 @@ func (r *Registry) Get(store Store, name string) (session *Session, err error) {
 }
 
 // Save saves all sessions registered for the current request.
-func (s *Registry) Save() error {
+func (r *Registry) Save() error {
 	var errMulti MultiError
-	for name, info := range s.sessions {
+	for name, info := range r.sessions {
 		session := info.s
 		if session.store == nil {
 			errMulti = append(errMulti, fmt.Errorf(
 				"sessions: missing store for session %q", name))
-		} else if err := session.store.Save(s.ctx, session); err != nil {
+		} else if err := session.store.Save(r.ctx, session); err != nil {
 			errMulti = append(errMulti, fmt.Errorf(
 				"sessions: error saving session %q -- %v", name, err))
 		}
@@ -180,9 +179,9 @@ func (s *Registry) Save() error {
 }
 
 // close put the registry instance into pool for reusing.
-func (s *Registry) close() {
-	s.ctx = nil
-	registryPool.Put(s)
+func (r *Registry) close() {
+	r.ctx = nil
+	registryPool.Put(r)
 }
 
 // Helpers
