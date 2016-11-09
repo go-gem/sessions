@@ -6,6 +6,7 @@ package sessions
 
 import (
 	"encoding/gob"
+	"fmt"
 	"testing"
 
 	"github.com/valyala/fasthttp"
@@ -24,9 +25,6 @@ func TestFlashes(t *testing.T) {
 	var err error
 	var session *Session
 	var flashes []interface{}
-
-	cookie := &fasthttp.Cookie{}
-	cookie.SetKey("session-key")
 
 	store := NewCookieStore([]byte("secret-key"))
 	store.Options = &Options{
@@ -59,23 +57,6 @@ func TestFlashes(t *testing.T) {
 	// Save.
 	if err = Save(ctx); err != nil {
 		t.Fatalf("Error saving session: %v", err)
-	}
-	// Check cookie.
-	if !ctx.Response.Header.Cookie(cookie) {
-		t.Fatalf("The cookie has not been sent to client.")
-		t.FailNow()
-	}
-	if string(cookie.Domain()) != session.Options.Domain {
-		t.Errorf("Expected cookie Domain: %s; Got %s", session.Options.Domain, cookie.Domain())
-	}
-	if string(cookie.Path()) != session.Options.Path {
-		t.Errorf("Expected cookie Path: %s; Got %s", session.Options.Path, cookie.Path())
-	}
-	if cookie.HTTPOnly() != session.Options.HttpOnly {
-		t.Errorf("Expected cookie HTTPOnly: %t; Got %t", session.Options.HttpOnly, cookie.HTTPOnly())
-	}
-	if cookie.Secure() != session.Options.Secure {
-		t.Errorf("Expected cookie Secure: %t; Got %t", session.Options.Secure, cookie.Secure())
 	}
 	// Get session by an invalid cookie name.
 	if _, err = store.Get(ctx, "session:key"); err.Error() != "sessions: invalid character in cookie name: session:key" {
@@ -110,6 +91,43 @@ func TestFlashes(t *testing.T) {
 	if len(flashes) != 0 {
 		t.Errorf("Expected dumped flashes; Got %v", flashes)
 	}
+}
+
+func TestFlashes2(t *testing.T) {
+	var err error
+	var session *Session
+	var flashes []interface{}
+
+	cookie := &fasthttp.Cookie{}
+	cookie.SetKey("session-key")
+
+	store := NewCookieStore([]byte("secret-key"))
+	store.Options = &Options{
+		Path:     "/user",
+		Domain:   "golang.org",
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	ctx := &fasthttp.RequestCtx{}
+
+	// Get a session.
+	if session, err = store.Get(ctx, "session-key"); err != nil {
+		t.Fatalf("Error getting session: %v", err)
+	}
+
+	// Save.
+	if err = Save(ctx); err != nil {
+		t.Fatalf("Error saving session: %v", err)
+	}
+	// Check cookie.
+	if !ctx.Response.Header.Cookie(cookie) {
+		t.Fatalf("The cookie has not been sent to client.")
+		t.FailNow()
+	}
+	if err = checkCookieOptions(cookie, store.Options); err != nil {
+		t.Fatal(err)
+	}
 
 	// Round 3
 	// Get a session.
@@ -142,4 +160,21 @@ func TestFlashes(t *testing.T) {
 	if custom.Type != 42 || custom.Message != "foo" {
 		t.Errorf("Expected %#v, got %#v", flashMessage{42, "foo"}, custom)
 	}
+}
+
+func checkCookieOptions(cookie *fasthttp.Cookie, options *Options) error {
+	if string(cookie.Domain()) != options.Domain {
+		return fmt.Errorf("Expected cookie Domain: %s; Got %s", options.Domain, cookie.Domain())
+	}
+	if string(cookie.Path()) != options.Path {
+		return fmt.Errorf("Expected cookie Path: %s; Got %s", options.Path, cookie.Path())
+	}
+	if cookie.HTTPOnly() != options.HttpOnly {
+		return fmt.Errorf("Expected cookie HTTPOnly: %t; Got %t", options.HttpOnly, cookie.HTTPOnly())
+	}
+	if cookie.Secure() != options.Secure {
+		return fmt.Errorf("Expected cookie Secure: %t; Got %t", options.Secure, cookie.Secure())
+	}
+
+	return nil
 }
