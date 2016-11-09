@@ -3,7 +3,7 @@
 // that can be found in the LICENSE file.
 
 /*
-Gem Sessions is a sessions package for fasthttp, it provides cookie and filesystem sessions
+Package sessions is a sessions package for fasthttp, it provides cookie and filesystem sessions
 and infrastructure for custom session backends.
 
 The key features are:
