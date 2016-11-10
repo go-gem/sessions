@@ -25,7 +25,6 @@ Let's start with an example that shows the sessions API in a nutshell:
 
 	import (
 		"fmt"
-		"time"
 		"log"
 
 		"github.com/go-gem/sessions"
@@ -56,10 +55,6 @@ Let's start with an example that shows the sessions API in a nutshell:
 				ctx.SetBodyString("No name specified.")
 			}
 			return
-		}
-
-		if len(ctx.QueryArgs().Peek("a")) > 0 {
-			time.Sleep(time.Second * time.Duration(5))
 		}
 
 		if name, ok := session.Values["name"].(string); ok {

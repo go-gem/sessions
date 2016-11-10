@@ -37,7 +37,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"log"
 
 	"github.com/go-gem/sessions"
@@ -68,10 +67,6 @@ func handler(ctx *fasthttp.RequestCtx) {
 			ctx.SetBodyString("No name specified.")
 		}
 		return
-	}
-
-	if len(ctx.QueryArgs().Peek("a")) > 0 {
-		time.Sleep(time.Second * time.Duration(5))
 	}
 
 	if name, ok := session.Values["name"].(string); ok {
