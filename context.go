@@ -60,7 +60,9 @@ func Clear(ctx *fasthttp.RequestCtx) {
 
 // clear is Clear without the lock.
 func clear(ctx *fasthttp.RequestCtx) {
-	data[ctx].close()
+	if r, ok := data[ctx]; ok {
+		r.close()
+	}
 	delete(data, ctx)
 	delete(datat, ctx)
 }
